@@ -5,13 +5,16 @@ import SpriteLayer from './LayerItem'
 function CanvasEditor({ layers, setLayers }) {
   const stageRef = useRef()
 
-  // Exponer exportación\ n  useEffect(() => { CanvasEditor.exportPNG = () => {
-    const uri = stageRef.current.toDataURL({ pixelRatio: 2 })
-    const link = document.createElement('a')
-    link.download = 'personaje.png'
-    link.href = uri
-    link.click()
-  }  [])
+  // Exponer exportación
+  useEffect(() => {
+    CanvasEditor.exportPNG = () => {
+      const uri = stageRef.current.toDataURL({ pixelRatio: 2 })
+      const link = document.createElement('a')
+      link.download = 'personaje.png'
+      link.href = uri
+      link.click()
+    }
+  }, [])
 
   return (
     <div className="flex-1 flex items-center justify-center bg-gray-200">
