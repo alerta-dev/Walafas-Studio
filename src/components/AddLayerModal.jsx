@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
 const categories = ['cuerpos', 'brazos', 'ojos', 'bocas', 'cabezas', 'cabellos/lineas', 'cabellos/colores', 'extras']
@@ -7,9 +7,10 @@ export default function AddLayerModal({ onAdd, onClose }) {
   const [category, setCategory] = useState(categories[0])
   const [fileList, setFileList] = useState([])
 
-  // Cargar archivos de public/assets
   useEffect(() => {
-    fetch(`/assets/${category}/`).then(res => res.json()).then(list => setFileList(list))
+    fetch(`/assets/${category}/`)
+      .then(res => res.json())
+      .then(list => setFileList(list))
   }, [category])
 
   return (
@@ -21,15 +22,19 @@ export default function AddLayerModal({ onAdd, onClose }) {
         </select>
         <div className="h-40 overflow-auto mb-4">
           {fileList.map(name => (
-            <div key={name} className="cursor-pointer hover:bg-gray-100 p-1" onClick={() => onAdd({
-              id: uuidv4(),
-              name,
-              src: `/assets/${category}/${name}`,
-              x: 100, y: 100,
-              width: 100, height: 100,
-              rotation: 0,
-              isSelected: false
-            })}>
+            <div
+              key={name}
+              className="cursor-pointer hover:bg-gray-100 p-1"
+              onClick={() => onAdd({
+                id: uuidv4(),
+                name,
+                src: `/assets/${category}/${name}`,
+                x: 100, y: 100,
+                width: 100, height: 100,
+                rotation: 0,
+                isSelected: false
+              })}
+            >
               {name}
             </div>
           ))}
