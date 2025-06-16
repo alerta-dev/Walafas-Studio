@@ -11,7 +11,7 @@ function CanvasEditor({ layers, setLayers }) {
     link.download = 'personaje.png'
     link.href = uri
     link.click()
-  } , [])
+  }  [])
 
   return (
     <div className="flex-1 flex items-center justify-center bg-gray-200">
