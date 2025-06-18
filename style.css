@@ -1,0 +1,43 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background-color: white;
+  color: black;
+  transition: 0.3s;
+}
+
+body.dark-mode {
+  background-color: #121212;
+  color: white;
+}
+
+.container {
+  max-width: 800px;
+  margin: auto;
+  padding: 20px;
+  text-align: center;
+}
+
+.canvas-wrapper {
+  margin: 20px 0;
+  border: 2px dashed #aaa;
+  background: #f0f0f0;
+  display: inline-block;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.selector {
+  margin: 5px;
+}
+
+button {
+  margin-top: 10px;
+  padding: 10px;
+  font-size: 16px;
+}
