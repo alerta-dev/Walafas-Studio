@@ -1,5 +1,5 @@
 const parts = ['body','arms','head','eyes','mouth','hair','feet','extras'];
-const counts = { body:5, arms:5, head:5, eyes:5, mouth:5, hair:5, feet:5, extras:5 };
+const counts = { body:5, arms:1, head:5, eyes:5, mouth:5, hair:5, feet:5, extras:5 };
 const indices = Object.fromEntries(parts.map(p=>[p,0]));
 const positions = { body:[0,0], arms:[0,0], head:[0,0], eyes:[0,0], mouth:[0,0], hair:[0,0], feet:[0,0], extras:[0,0] };
 
