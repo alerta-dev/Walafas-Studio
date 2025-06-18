@@ -3,27 +3,37 @@ const ctx = canvas.getContext('2d');
 
 const parts = {
   body: [],
+  arms: [],
   eyes: [],
   mouth: [],
   hair: [],
+  head: [],
+  feet: [],
   extras: []
 };
 
 const positions = {
   body: [0, 0],
+  arms: [0, 0],
   eyes: [0, 0],
   mouth: [0, 0],
   hair: [0, 0],
+  head: [0, 0],
+  feet: [0, 0],
   extras: [0, 0]
 };
 
 const selectors = {
   body: document.getElementById('bodySelect'),
+  arms: document.getElementById('armsSelect'),
   eyes: document.getElementById('eyesSelect'),
   mouth: document.getElementById('mouthSelect'),
   hair: document.getElementById('hairSelect'),
+  head: document.getElementById('headSelect'),
+  feet: document.getElementById('feetSelect'),
   extras: document.getElementById('extrasSelect')
 };
+
 
 async function loadImages() {
   for (let part in parts) {
