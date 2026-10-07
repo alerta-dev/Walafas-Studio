@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Creador de Walfas</title>
+<style>
+:root{--bg:#f4eef7;--panel:#fff;--ink:#2a2233;--mut:#7b6f88;--acc:#c0407a;--line:#e0d6e8}
+@media (prefers-color-scheme:dark){:root{--bg:#1b1622;--panel:#262031;--ink:#efe9f5;--mut:#a597b5;--acc:#e0609a;--line:#3a3148}}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.4 system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+header{padding:10px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+h1{font-size:18px;margin:0;flex:1}
+main{display:grid;grid-template-columns:minmax(300px,560px) minmax(300px,1fr);gap:12px;padding:0 12px 16px;align-items:start}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px}
+#wrap{width:100%;aspect-ratio:550/400;position:relative;border-radius:8px;overflow:hidden;background:repeating-conic-gradient(#d9d9d9 0 25%,#fff 0 50%) 0 0/20px 20px;touch-action:none}
+#wrap.drop{outline:3px dashed var(--acc)}
+#stage{width:100%;height:100%;display:block}
+.hc{fill:var(--hair,#888)}.hs{stroke:var(--hair,#888)}
+.ent{cursor:grab}.sel .selbox{display:block}.selbox{display:none;fill:none;stroke:#e0408a;stroke-width:1.5;stroke-dasharray:5 3;pointer-events:none}
+button,select,input{font:inherit;color:inherit}
+button{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:4px 9px;cursor:pointer}
+button:hover{border-color:var(--acc)}button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+input[type=text],select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:4px 7px;color:inherit}
+.row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:6px 0}
+.row label{color:var(--mut);font-size:12px}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:6px;max-height:340px;overflow:auto;padding:2px}
+.th{aspect-ratio:1;border:2px solid var(--line);border-radius:8px;background:#fff;padding:2px;cursor:pointer;position:relative;overflow:hidden}
+.th.cur{border-color:var(--acc)}.th svg{width:100%;height:100%;display:block}
+.th i{position:absolute;left:0;right:0;bottom:0;font:9px/1.2 system-ui;background:#000a;color:#fff;padding:1px 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-style:normal}
+.th.none{display:flex;align-items:center;justify-content:center;color:#999;font-size:12px}
+textarea{width:100%;height:54px;font:12px monospace;resize:vertical}
+small{color:var(--mut)}
+.layers{max-height:130px;overflow:auto;margin:6px 0;display:flex;flex-direction:column;gap:2px}
+.ly{display:flex;gap:4px;align-items:center;border:1px solid var(--line);border-radius:6px;padding:1px 6px;cursor:pointer;font-size:12px}
+.ly.on{border-color:var(--acc);background:var(--bg)}.ly span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ly button{padding:0 5px;border:0;background:none}
+textarea.t{height:70px;font:13px system-ui}
+</style>
+</head>
+<body>
+<header>
+  <h1>Creador de Walfas <small>· recreación web</small></h1>
+  <button id="snd" title="Sonido">🔊</button>
+</header>
+<main>
+  <section class="card">
+    <div id="wrap"><svg id="stage" viewBox="0 0 550 400" xmlns="http://www.w3.org/2000/svg">
+      <defs><clipPath id="sclip"><rect width="550" height="400"/></clipPath></defs>
+      <g clip-path="url(#sclip)"><g id="bg"></g><g id="ents"></g></g>
+    </svg></div>
+    <div class="row">
+      <button id="bNew">＋ Personaje</button><button id="bRand">🎲 Aleatorio</button><button id="bClone">Clonar</button><button id="bDel">Borrar</button>
+      <button id="bFH">↔ Voltear</button><button id="bFV">↕ Voltear</button><button id="bFront">Al frente</button><button id="bBack">Al fondo</button>
+    </div>
+    <div class="row">
+      <label>Tamaño <input id="rScale" type="range" min="1" max="400" value="100"></label>
+      <label>Rotación <input id="rRot" type="range" min="-180" max="180" value="0"></label>
+    </div>
+    <div class="row">
+      <button id="bPng">💾 Guardar PNG</button><label><input id="kWhite" type="checkbox"> PNG con fondo blanco</label><button id="bUp">🖼 Subir imagen</button><input id="fUp" type="file" accept="image/*" multiple hidden><button id="bClear">Vaciar escena</button>
+      <small id="info"></small>
+    </div>
+    <div class="row"><label>Adjuntar a <select id="sAtt"></select></label><label><input id="kFront" type="checkbox" checked> delante</label><small>(lo adjuntado se mueve, escala y gira con el personaje)</small></div>
+    <label class="row">Capas</label><div class="layers" id="layers"></div>
+  </section>
+  <section class="card">
+    <div class="tabs" id="mainTabs"></div>
+    <div id="tChar">
+      <div class="row"><label>Nombre <input id="iName" type="text" size="14"></label>
+        <label>Preset <select id="sPreset"></select></label></div>
+      <div class="row"><label>Color de pelo <input id="cHair" type="color"></label>
+        <label><input id="kLock" type="checkbox"> Bloquear esta categoría al azar</label></div>
+      <div class="tabs" id="catTabs"></div>
+      <div class="grid" id="grid"></div>
+      <div class="row"><label>DNA</label></div>
+      <textarea id="dna" spellcheck="false"></textarea>
+      <div class="row"><button id="bDnaCopy">Copiar DNA</button><button id="bDnaLoad">Crear desde DNA</button><small id="dnaMsg"></small></div>
+    </div>
+    <div id="tBub" hidden>
+      <div class="row"><small>Clic en un tipo para añadir un globo:</small></div><div class="grid" id="gridBub" style="max-height:110px"></div>
+      <div class="row"><label>Texto</label></div><textarea class="t" id="btext" spellcheck="false"></textarea>
+      <div class="row"><label>Fuente <select id="bfont"></select></label><label>Tipo <select id="btype"></select></label>
+      <label>Color <input id="bcol" type="color" value="#000000"></label><label>Tamaño <input id="bsize" type="range" min="8" max="48" value="16"></label></div>
+      <small>Selecciona un globo en la escena para editarlo. Voltear solo afecta a la burbuja, no al texto.</small></div>
+    <div id="tBg" hidden><div class="grid" id="gridBg"></div></div>
+    <div id="tObj" hidden><div class="grid" id="gridObj"></div></div>
+  </section>
+</main>
+<script>
+"use strict";
+const NS='http://www.w3.org/2000/svg', $=s=>document.querySelector(s);
+const CATS=[['Hair','Pelo'],['Body','Cuerpo'],['Arms','Brazos'],['Shoes','Piernas'],['Eyes','Ojos'],['Mouth','Boca'],['Hats','Sombrero'],['Items','Objeto'],['Acc','Accesorio'],['Back','Alas/Espalda']];
+const KEY={Hats:'hat',Hair:'head',Body:'body',Arms:'arm',Shoes:'shoe',Eyes:'eye',Mouth:'mouth',Items:'item',Acc:'acc',Back:'wing'};
+const DNAORDER=['Hats','Hair','Body','Arms','Shoes','Eyes','Mouth','Items','Acc','Back'];
+const KIND={char:'🧍',obj:'📦',img:'🖼',bubble:'💬'};
+let D, FONTS=null, libs={}, ents=[], all={}, sel=null, curCat='Hair', locks={}, muted=false, uid=0, curBg=0, spawn=0;
+const defsSvg=document.body.appendChild(Object.assign(document.createElementNS(NS,'svg'),{style:'position:absolute;width:0;height:0'}));
+const defsEl=defsSvg.appendChild(document.createElementNS(NS,'defs'));
+
+function sfx(n){ if(muted) return; try{const a=new Audio('sounds/'+n+'.mp3');a.volume=.5;a.play().catch(()=>{});}catch(e){} }
+function lib(name){
+  if(libs[name]) return libs[name];
+  return libs[name]=fetch('parts/'+name+'.svg').then(r=>r.text()).then(t=>{
+    const doc=new DOMParser().parseFromString(t,'image/svg+xml'), m={};
+    doc.querySelectorAll('defs > *').forEach(n=>defsEl.appendChild(document.importNode(n,true)));
+    doc.documentElement.querySelectorAll(':scope > g[id^=f]').forEach(g=>m[+g.id.slice(1)]=document.importNode(g,true));
+    libs[name]=m; return m;
+  });
+}
+const L=n=>libs[n]&&typeof libs[n].then!=='function'?libs[n]:null;
+function cloneFrame(name,f,into){ const m=L(name); if(m&&m[f]) for(const c of m[f].childNodes) into.appendChild(c.cloneNode(true)); }
+function el(tag,attrs,parent){ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); if(parent) parent.appendChild(e); return e; }
+const mtx=m=>`matrix(${m.join(' ')})`;
+const part=(cat,i)=>D.parts[cat][i];
+const clear=n=>{ while(n.firstChild) n.removeChild(n.firstChild); };
+
+/* ---------- entidades ---------- */
+function newCharData(o={}){
+  const c={kind:'char',name:'Personaje',scale:100,idx:{},color:'888888'};
+  for(const [cat] of CATS) c.idx[cat]=0; return Object.assign(c,o);
+}
+function mkEnt(c){
+  Object.assign(c,{id:++uid,x:c.x??275,y:c.y??250,rot:c.rot||0,fx:c.fx||1,fy:c.fy||1,scale:c.scale||100,parent:null,front:true,hidden:false});
+  c.g=el('g',{class:'ent'}); c.back=el('g',{},c.g); c.main=el('g',{},c.g); c.front_=el('g',{},c.g);
+  c.g.addEventListener('pointerdown',e=>startDrag(e,c)); c.g.addEventListener('dblclick',()=>{ if(c.kind==='bubble'){ setMain('Bub'); $('#btext').focus(); } });
+  all[c.id]=c; $('#ents').appendChild(c.g); ents.push(c); return c;
+}
+function applyT(c){
+  const f=c.kind==='bubble'?'':`${c.fx} ${c.fy}`; const s=c.scale/100;
+  c.g.setAttribute('transform',`translate(${c.x} ${c.y}) rotate(${c.rot}) scale(${c.kind==='bubble'?s+' '+s:(c.fx*s)+' '+(c.fy*s)})`);
+  c.g.style.display=c.hidden?'none':'';
+  if(c.kind==='bubble'&&c.shape) c.shape.setAttribute('transform',`scale(${c.fx} ${c.fy})`);
+}
+function drawBox(c){
+  if(c.box) c.box.remove(); const bb=c.main.getBBox();
+  c.box=el('rect',{class:'selbox',x:bb.x-4,y:bb.y-4,width:bb.width+8,height:bb.height+8},c.g); c.bb=bb;
+}
+async function build(c){
+  clear(c.main); c.shape=null;
+  if(c.kind==='char') await buildChar(c); else if(c.kind==='obj') await buildObj(c);
+  else if(c.kind==='img') buildImg(c); else if(c.kind==='bubble') await buildBubble(c);
+  applyT(c); drawBox(c); if(sel===c) drawLayers();
+}
+async function buildChar(c){
+  const need=new Set(['Eye2','Hair2']); for(const [cat] of CATS) if(part(cat,c.idx[cat])!=='none') need.add(cat);
+  await Promise.all([...need].map(lib));
+  c.g.style.setProperty('--hair','#'+c.color);
+  const inner=el('g',{transform:'scale(0.05)'},c.main);
+  for(const ly of D.layers){
+    const cat=ly.lib==='Hair2'?'Hair':ly.lib; const p=part(cat,c.idx[cat]); if(p==='none') continue;
+    let frame=p[1]; if(ly.lib==='Hair2'){ frame=p[5]; if(!(frame>0)) continue; }
+    const lg=el('g',{transform:mtx(ly.m)},inner); cloneFrame(ly.lib,frame,lg);
+    if(ly.lib==='Hair'){ const e=part('Eyes',c.idx.Eyes); const e2=e!=='none'&&e[5]>0?e[5]:0; lg.querySelectorAll('.e2').forEach(ph=>{ if(e2) cloneFrame('Eye2',e2,ph); }); }
+  }
+}
+async function buildObj(c){ await lib('Objects'); const i=el('g',{transform:'scale(0.05)'},c.main); cloneFrame('Objects',c.frame,i); }
+function buildImg(c){ const w=c.w,h=c.h; el('image',{href:c.src,x:-w/2,y:-h/2,width:w,height:h,preserveAspectRatio:'none'},c.main); }
+
+/* ---------- globos de texto ---------- */
+async function loadFonts(){ if(!FONTS) FONTS=await (await fetch('fonts.json')).json(); return FONTS; }
+function textGroup(parent,text,fontName,size,color,boxW,cx,cy){
+  const F=FONTS[fontName]||FONTS['Wild Words'], k=size/20480, lh=(F.asc+F.desc)*k+2;
+  const A=FONTS.Arial.glyphs, G=ch=>F.glyphs[ch.charCodeAt(0)]||A[ch.charCodeAt(0)]; const adv=ch=>(G(ch)||{a:9000}).a*k;
+  const w=s=>[...s].reduce((a,ch)=>a+adv(ch),0), lines=[];
+  for(const para of text.split('\n')){
+    let cur=''; for(const word of para.split(' ')){ const t=cur?cur+' '+word:word; if(cur&&w(t)>boxW){ lines.push(cur); cur=word; } else cur=t; } lines.push(cur);
+  }
+  const g=el('g',{fill:color},parent); let y=cy-lines.length*lh/2+F.asc*k;
+  for(const ln of lines){ let x=cx-w(ln)/2;
+    for(const ch of ln){ const gl=G(ch); if(gl&&gl.d) el('path',{d:gl.d,transform:`translate(${x} ${y}) scale(${k})`},g); x+=adv(ch); }
+    y+=lh; }
+  return g;
+}
+async function buildBubble(c){
+  await Promise.all([lib('Bubbles'),loadFonts()]);
+  c.shape=el('g',{},c.main); const sg=el('g',{transform:'translate(3 -17) scale(0.05)'},c.shape); cloneFrame('Bubbles',c.type,sg);
+  const bb=c.shape.getBBox();
+  c.tcx=bb.x+bb.width/2; c.tcy=bb.y+bb.height/2; c.tw=bb.width*.78;
+  textGroup(c.main,c.text,c.font,c.size,c.tcolor,c.tw,c.tcx,c.tcy);
+}
+
+/* ---------- jerarquía (adjuntar) ---------- */
+function holder(c){ return c.parent?(c.front?c.parent.front_:c.parent.back):$('#ents'); }
+function setParent(c,p,front){
+  const C=c.g.getScreenCTM(); if(c.box) c.box.style.display='none';
+  c.parent=p; c.front=front; holder(c).appendChild(c.g);
+  if(p){ ents=ents.filter(e=>e!==c); } else if(!ents.includes(c)) ents.push(c);
+  if(C){ const H=holder(c).getScreenCTM(), M=H.inverse().multiply(C);
+    c.x=M.e; c.y=M.f; const sc=Math.hypot(M.a,M.b), det=M.a*M.d-M.b*M.c; c.rot=Math.atan2(M.b,M.a)*180/Math.PI;
+    c.fx=1; c.fy=det<0?-1:1; c.scale=sc*100; if(det<0&&c.kind!=='bubble'){ c.fy=-1; }
+    c.scale=Math.max(1,Math.min(1000,c.scale)); }
+  if(c.box) c.box.style.display=''; applyT(c);
+}
+function descendants(c){ return Object.values(all).filter(e=>{ let p=e.parent; while(p){ if(p===c) return true; p=p.parent; } return false; }); }
+
+/* ---------- selección / arrastre ---------- */
+function pick(c){
+  sel=c; Object.values(all).forEach(e=>e.g.classList.toggle('sel',e===c));
+  if(c){ $('#rScale').value=c.scale; $('#rRot').value=c.rot; }
+  syncUI(); drawLayers();
+}
+let drag=null;
+function ptIn(node,e){ const s=$('#stage'),p=s.createSVGPoint(); p.x=e.clientX;p.y=e.clientY; return p.matrixTransform(node.getScreenCTM().inverse()); }
+function startDrag(e,c){ e.preventDefault(); e.stopPropagation(); pick(c); const p=ptIn(c.g.parentNode,e); drag={c,dx:c.x-p.x,dy:c.y-p.y}; sfx('MenuSelect'); }
+addEventListener('pointermove',e=>{ if(!drag) return; const p=ptIn(drag.c.g.parentNode,e); drag.c.x=p.x+drag.dx; drag.c.y=p.y+drag.dy; applyT(drag.c); });
+addEventListener('pointerup',()=>{ if(drag){drag=null;save();} });
+$('#stage').addEventListener('pointerdown',()=>pick(null));
+addEventListener('keydown',e=>{ if(e.key==='Delete'&&sel&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) del(); });
+function del(c=sel){ if(!c) return; descendants(c).forEach(d=>{ delete all[d.id]; }); c.g.remove(); delete all[c.id]; ents=ents.filter(e=>e!==c);
+  if(sel&&!all[sel.id]) pick(ents[ents.length-1]||null); else drawLayers(); save(); }
+function orderTop(c,top){ const h=holder(c); if(top) h.appendChild(c.g); else h.prepend(c.g); if(!c.parent){ ents=ents.filter(e=>e!==c); top?ents.push(c):ents.unshift(c);} save(); drawLayers(); }
+
+/* ---------- DNA ---------- */
+function getDNA(c){ return [D.version,c.name,Math.round(c.scale),...DNAORDER.map(k=>c.idx[k]),c.color.toUpperCase()].join(':'); }
+function parseDNA(t){
+  t=t.trim().replace(/^dna-/i,''); const a=t.split(':'); if(a.length<13) throw new Error('DNA inválido');
+  const v=parseFloat(a[0]), g=i=>parseInt(a[i])||0, c={name:a[1]||'Mutant Clone',scale:parseFloat(a[2])||100,idx:{}};
+  c.idx.Hats=g(3); c.idx.Hair=g(4); c.idx.Body=g(5)+(v<3.23?1:0); c.idx.Arms=g(6)+(v<3.2?1:0); c.idx.Shoes=g(7)+(v<3.2?1:0);
+  c.idx.Eyes=g(8); c.idx.Mouth=g(9); c.idx.Items=g(10); c.idx.Acc=g(11); c.idx.Back=g(12);
+  for(const [cat] of CATS){ const n=D.parts[cat].length; if(c.idx[cat]<0||c.idx[cat]>=n) c.idx[cat]=0; }
+  c.color=(v<3.23||!a[13])?D.parts.Hair[c.idx.Hair][6]:a[13].replace(/[^0-9a-f]/gi,'').padEnd(6,'0').slice(0,6);
+  return c;
+}
+function randomIdx(c){
+  for(const [cat] of CATS){ if(!locks[cat]) c.idx[cat]=Math.floor(Math.random()*D.parts[cat].length); }
+  if(!locks.Hair) c.color=D.parts.Hair[c.idx.Hair][6];
+}
+function applyPreset(c,name){ const p=D.presets[name]; if(!p) return; for(const cat in KEY) c.idx[cat]=p[KEY[cat]]||0; c.color=D.parts.Hair[c.idx.Hair][6]; c.name=name; }
+
+/* ---------- altas ---------- */
+function freeSpot(){ spawn=(spawn+1)%6; return [275+(spawn%3-1)*110, 200+(spawn>2?60:-20)]; }
+async function addChar(o,select=true){ const c=mkEnt(newCharData(o)); await build(c); if(select) pick(c); save(); return c; }
+async function addObj(frame,name){
+  const [x,y]=freeSpot(); const c=mkEnt({kind:'obj',name,frame,x,y}); await build(c);
+  const m=Math.max(c.bb.width,c.bb.height); if(m>200){ c.scale=Math.max(5,Math.round(200/m*100)); applyT(c); drawBox(c); }
+  pick(c); save(); sfx('ItemGet'); return c;
+}
+function addImgFile(file){
+  return new Promise(res=>{ const r=new FileReader(); r.onload=()=>{ const im=new Image(); im.onload=async()=>{
+    let src=r.result, w=im.naturalWidth||200, h=im.naturalHeight||200;
+    if(!/svg/.test(file.type)&&Math.max(w,h)>800){ const k=800/Math.max(w,h), cv=document.createElement('canvas'); cv.width=w=Math.round(w*k); cv.height=h=Math.round(h*k); cv.getContext('2d').drawImage(im,0,0,w,h); src=cv.toDataURL(/jpe?g/.test(file.type)?'image/jpeg':'image/png',.9); }
+    const [x,y]=freeSpot(); const c=mkEnt({kind:'img',name:file.name.replace(/\.[^.]+$/,''),src,w,h,x,y,scale:Math.min(100,Math.round(150/Math.max(w,h)*100))});
+    await build(c); pick(c); save(); res(c); }; im.onerror=()=>res(); im.src=r.result; }; r.readAsDataURL(file); });
+}
+async function addBubble(type,o={}){
+  const [x,y]=freeSpot(); const c=mkEnt({kind:'bubble',name:'Globo',type,text:'Escribe aquí',font:'Wild Words',size:16,tcolor:'#000000',x,y:y-40,...o});
+  await build(c); const bw=c.bb.width; if(bw>230){ c.scale=Math.round(230/bw*100); applyT(c); drawBox(c); }
+  pick(c); save(); sfx('Bubble'); return c;
+}
+
+/* ---------- UI ---------- */
+function syncUI(){
+  const c=sel, isChar=c&&c.kind==='char', isB=c&&c.kind==='bubble';
+  $('#tChar').style.opacity=isChar?1:.45;
+  if(isChar){ $('#iName').value=c.name; $('#cHair').value='#'+c.color.slice(0,6).padEnd(6,'0'); $('#dna').value=getDNA(c); $('#sPreset').value=D.presets[c.name]?c.name:''; }
+  if(isB){ $('#btext').value=c.text; $('#bfont').value=c.font; $('#btype').value=c.type; $('#bcol').value=c.tcolor; $('#bsize').value=c.size; }
+  $('#kLock').checked=!!locks[curCat];
+  document.querySelectorAll('#grid .th').forEach(t=>t.classList.toggle('cur',isChar&&+t.dataset.i===c.idx[curCat]));
+  $('#info').textContent=c?`${KIND[c.kind]} ${c.name}`:'Nada seleccionado';
+  const sa=$('#sAtt'); sa.innerHTML='<option value="0">— libre —</option>'; sa.disabled=!c||c.kind==='char';
+  if(c) Object.values(all).filter(e=>e.kind==='char'&&e!==c).forEach(e=>sa.add(new Option(e.name+' #'+e.id,e.id)));
+  sa.value=c&&c.parent?c.parent.id:0; $('#kFront').checked=c?c.front:true;
+}
+function drawLayers(){
+  const box=$('#layers'); box.innerHTML=''; const add=(c,d)=>{
+    const r=document.createElement('div'); r.className='ly'+(c===sel?' on':''); r.style.marginLeft=d*14+'px';
+    r.innerHTML=`${KIND[c.kind]} <span></span>`; r.querySelector('span').textContent=c.name;
+    const b=document.createElement('button'); b.textContent=c.hidden?'🚫':'👁'; b.onclick=e=>{ e.stopPropagation(); c.hidden=!c.hidden; applyT(c); drawLayers(); }; r.appendChild(b);
+    r.onclick=()=>pick(c); box.appendChild(r);
+    Object.values(all).filter(k=>k.parent===c).forEach(k=>add(k,d+1)); };
+  [...ents].reverse().forEach(c=>add(c,0));
+}
+function tabs(box,items,cur,fn){ box.innerHTML=''; items.forEach(([k,l])=>{ const b=document.createElement('button'); b.textContent=l; b.className=k===cur?'on':''; b.onclick=()=>{ fn(k); [...box.children].forEach(x=>x.classList.toggle('on',x===b)); }; box.appendChild(b); }); }
+const io=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ io.unobserve(e.target); e.target._draw&&e.target._draw(); } }),{rootMargin:'200px'});
+function thumb(box,libName,frame,i,label,onClick,opts={}){
+  const d=document.createElement('div'); d.className='th'; d.dataset.i=i; d.title=label; d.onclick=onClick;
+  d._draw=async()=>{
+    await lib(libName); if(opts.extra) await Promise.all(opts.extra.map(lib));
+    const s=document.createElementNS(NS,'svg'); d.appendChild(s); if(opts.color) s.style.setProperty('--hair','#'+opts.color);
+    const g=el('g',{transform:'scale(0.05)'},s); cloneFrame(libName,frame,el('g',{},g)); if(opts.second) cloneFrame('Hair2',opts.second,el('g',{},g));
+    const r0=g.getBBox(), bb={x:r0.x*.05,y:r0.y*.05,width:r0.width*.05,height:r0.height*.05};
+    if(!bb.width&&!bb.height){ d.classList.add('none'); d.textContent='vacío'; s.remove(); }
+    else { const p=Math.max(bb.width,bb.height)*.03+1; s.setAttribute('viewBox',opts.vb||`${bb.x-p} ${bb.y-p} ${bb.width+2*p} ${bb.height+2*p}`); }
+    if(label){ const i2=document.createElement('i'); i2.textContent=label; d.appendChild(i2); }
+  };
+  box.appendChild(d); io.observe(d); return d;
+}
+function noneBtn(box,i,fn){ const d=document.createElement('div'); d.className='th none'; d.dataset.i=i; d.textContent='ninguno'; d.onclick=fn; box.appendChild(d); }
+function fillGrid(cat){
+  const box=$('#grid'); box.innerHTML=''; D.parts[cat].forEach((p,i)=>{
+    const go=()=>{ if(!sel||sel.kind!=='char') return; sel.idx[cat]=i; if(cat==='Hair') sel.color=D.parts.Hair[i][6]; build(sel).then(()=>{syncUI();save();}); sfx('MenuSelect'); };
+    if(p==='none') return noneBtn(box,i,go);
+    const o={}; if(cat==='Hair'){ o.color=p[6]; if(p[5]>0) o.second=p[5]; o.extra=['Hair2']; }
+    thumb(box,cat,p[1],i,p[0],go,o);
+  }); syncUI();
+}
+function setMain(k){
+  ['Char','Bub','Bg','Obj'].forEach(id=>$('#t'+id).hidden=id!==k);
+  [...$('#mainTabs').children].forEach(b=>b.classList.toggle('on',b.dataset.k===k));
+  if(k==='Bg'&&!$('#gridBg').children.length) fillBg();
+  if(k==='Obj'&&!$('#gridObj').children.length) D.objects.forEach((o,i)=>thumb($('#gridObj'),'Objects',o[1],i,o[0],()=>addObj(o[1],o[0])));
+  if(k==='Bub'&&!$('#gridBub').children.length) for(let t=1;t<=5;t++) thumb($('#gridBub'),'Bubbles',t,t,'Tipo '+t,()=>addBubble(t));
+}
+function fillBg(){ const box=$('#gridBg'); D.bgs.forEach((b,i)=>{ if(b==='none') return noneBtn(box,i,()=>setBg(0)); thumb(box,'BGs',b[1],i,b[0],()=>setBg(i),{vb:'0 0 550 400'}); }); }
+async function setBg(i){ curBg=i; const g=$('#bg'); clear(g); const b=D.bgs[i]; if(b==='none'){ save(); return; } await lib('BGs'); cloneFrame('BGs',b[1],el('g',{transform:'scale(0.05)'},g)); sfx('MenuSelect'); save(); }
+
+/* ---------- PNG ---------- */
+function exportPng(){
+  const s=$('#stage').cloneNode(true); s.querySelectorAll('.selbox').forEach(n=>n.remove());
+  const ids=new Set([...s.outerHTML.matchAll(/url\(#([^)]+)\)/g)].map(m=>m[1])), defs=s.querySelector('defs');
+  ids.forEach(id=>{ const n=defsEl.querySelector('[id="'+id+'"]'); if(n&&id!=='sclip') defs.appendChild(n.cloneNode(true)); });
+  const st=document.createElementNS(NS,'style'); st.textContent='.hc{fill:var(--hair,#888)}.hs{stroke:var(--hair,#888)}'; s.prepend(st);
+  s.setAttribute('width',1100); s.setAttribute('height',800);
+  if($('#kWhite').checked) s.insertBefore(el('rect',{width:550,height:400,fill:'#fff'}),s.querySelector('g'));
+  const url=URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(s)],{type:'image/svg+xml'}));
+  const img=new Image(); img.onload=()=>{ const cv=document.createElement('canvas'); cv.width=1100; cv.height=800; cv.getContext('2d').drawImage(img,0,0); cv.toBlob(b=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='walfas.png'; a.click(); }); URL.revokeObjectURL(url); };
+  img.src=url;
+}
+
+/* ---------- guardado ---------- */
+const FIELDS=['kind','name','x','y','rot','fx','fy','scale','front','hidden','idx','color','frame','src','w','h','type','text','font','size','tcolor'];
+function save(){
+  try{ const list=[...document.querySelectorAll('#ents .ent')].map(g=>Object.values(all).find(e=>e.g===g)).filter(Boolean);
+    localStorage.setItem('walfas-scene2',JSON.stringify({bg:curBg,list:list.map(e=>{ const o={_id:e.id,_p:e.parent?e.parent.id:0}; FIELDS.forEach(f=>{ if(e[f]!==undefined) o[f]=e[f]; }); return o; })})); }catch(e){}
+}
+async function load(){
+  try{ const s=JSON.parse(localStorage.getItem('walfas-scene2')||'null'); if(!s||!s.list.length) return false;
+    if(s.bg) await setBg(s.bg); const map={};
+    for(const o of s.list){ const c=mkEnt({...o}); c.hidden=!!o.hidden; map[o._id]=c; await build(c); }
+    for(const o of s.list) if(o._p&&map[o._p]){ const c=map[o._id]; const keep={x:o.x,y:o.y,rot:o.rot,fx:o.fx,fy:o.fy,scale:o.scale};
+      c.parent=map[o._p]; c.front=o.front!==false; ents=ents.filter(e=>e!==c); holder(c).appendChild(c.g); Object.assign(c,keep); applyT(c); }
+    return true; }catch(e){ console.error(e); return false; }
+}
+
+/* ---------- init ---------- */
+(async function(){
+  D=await (await fetch('data.json')).json();
+  const mt=$('#mainTabs'); tabs(mt,[['Char','Personaje'],['Bub','Globos'],['Bg','Fondo'],['Obj','Objetos']],'Char',setMain); [...mt.children].forEach((b,i)=>b.dataset.k=['Char','Bub','Bg','Obj'][i]);
+  tabs($('#catTabs'),CATS,curCat,k=>{curCat=k;fillGrid(k);});
+  const sp=$('#sPreset'); sp.innerHTML='<option value="">— preset —</option>'+Object.keys(D.presets).sort().map(n=>`<option>${n}</option>`).join('');
+  sp.onchange=()=>{ if(sel&&sel.kind==='char'&&sp.value){ applyPreset(sel,sp.value); build(sel).then(()=>{syncUI();save();}); sfx('PowerUpS'); } };
+  $('#iName').oninput=e=>{ if(sel&&sel.kind==='char'){ sel.name=e.target.value; $('#dna').value=getDNA(sel); drawLayers(); save(); } };
+  $('#cHair').oninput=e=>{ if(sel&&sel.kind==='char'){ sel.color=e.target.value.slice(1); sel.g.style.setProperty('--hair',e.target.value); $('#dna').value=getDNA(sel); save(); } };
+  $('#kLock').onchange=e=>{ locks[curCat]=e.target.checked; };
+  $('#rScale').oninput=e=>{ if(sel){ sel.scale=+e.target.value; applyT(sel); } };
+  $('#rRot').oninput=e=>{ if(sel){ sel.rot=+e.target.value; applyT(sel); } };
+  $('#rScale').onchange=$('#rRot').onchange=save;
+  $('#bNew').onclick=async()=>{ const c=await addChar({x:freeSpot()[0]}); const k=Object.keys(D.presets); applyPreset(c,k[Math.floor(Math.random()*k.length)]); await build(c); syncUI(); save(); sfx('PowerUpS'); };
+  $('#bRand').onclick=()=>{ if(sel&&sel.kind==='char'){ randomIdx(sel); build(sel).then(()=>{syncUI();save();}); sfx('Whoosh'); } };
+  $('#bClone').onclick=async()=>{ if(!sel) return; const s=sel, o={}; FIELDS.forEach(f=>{ if(s[f]!==undefined&&!['front','hidden'].includes(f)) o[f]=JSON.parse(JSON.stringify(s[f])); }); o.x+=30; o.y+=10;
+    const c=mkEnt(o); await build(c); if(s.parent) setParent(c,s.parent,s.front); for(const k of descendants(s).filter(d=>d.parent===s)){ const o2={}; FIELDS.forEach(f=>{ if(k[f]!==undefined) o2[f]=JSON.parse(JSON.stringify(k[f])); }); const k2=mkEnt(o2); await build(k2); k2.parent=c; k2.front=k.front; ents=ents.filter(e=>e!==k2); holder(k2).appendChild(k2.g); applyT(k2); }
+    pick(c); save(); };
+  $('#bDel').onclick=()=>del();
+  $('#bFH').onclick=()=>{ if(sel){ sel.fx*=-1; applyT(sel); save(); } };
+  $('#bFV').onclick=()=>{ if(sel){ sel.fy*=-1; applyT(sel); save(); } };
+  $('#bFront').onclick=()=>sel&&orderTop(sel,true); $('#bBack').onclick=()=>sel&&orderTop(sel,false);
+  $('#sAtt').onchange=e=>{ if(!sel) return; const p=+e.target.value?all[+e.target.value]:null; setParent(sel,p,$('#kFront').checked); drawLayers(); save(); };
+  $('#kFront').onchange=e=>{ if(sel&&sel.parent){ setParent(sel,sel.parent,e.target.checked); save(); } else if(sel) sel.front=e.target.checked; };
+  $('#bPng').onclick=exportPng;
+  $('#bUp').onclick=()=>$('#fUp').click(); $('#fUp').onchange=async e=>{ for(const f of e.target.files) await addImgFile(f); e.target.value=''; };
+  const w=$('#wrap'); w.ondragover=e=>{ e.preventDefault(); w.classList.add('drop'); }; w.ondragleave=()=>w.classList.remove('drop');
+  w.ondrop=async e=>{ e.preventDefault(); w.classList.remove('drop'); for(const f of e.dataTransfer.files) if(/^image\//.test(f.type)) await addImgFile(f); };
+  $('#bClear').onclick=()=>{ Object.values(all).forEach(e=>e.g.remove()); all={}; ents=[]; pick(null); save(); };
+  $('#bDnaCopy').onclick=()=>{ $('#dna').select(); try{navigator.clipboard.writeText($('#dna').value);}catch(e){document.execCommand('copy');} $('#dnaMsg').textContent='Copiado'; };
+  $('#bDnaLoad').onclick=async()=>{ try{ await addChar(parseDNA($('#dna').value)); $('#dnaMsg').textContent='Personaje creado'; sfx('PowerUpS'); }catch(e){ $('#dnaMsg').textContent=e.message; } };
+  $('#snd').onclick=e=>{ muted=!muted; e.target.textContent=muted?'🔇':'🔊'; };
+  // globos
+  await loadFonts(); $('#bfont').innerHTML=Object.keys(FONTS).map(n=>`<option>${n}</option>`).join(''); $('#btype').innerHTML=[1,2,3,4,5].map(n=>`<option value="${n}">Tipo ${n}</option>`).join('');
+  const bub=f=>{ if(sel&&sel.kind==='bubble'){ f(sel); build(sel); save(); } };
+  $('#btext').oninput=e=>bub(c=>c.text=e.target.value); $('#bfont').onchange=e=>bub(c=>c.font=e.target.value); $('#btype').onchange=e=>bub(c=>c.type=+e.target.value);
+  $('#bcol').oninput=e=>bub(c=>c.tcolor=e.target.value); $('#bsize').oninput=e=>bub(c=>c.size=+e.target.value);
+  fillGrid(curCat);
+  if(!(await load())){ const c=await addChar({}); applyPreset(c,'Reimu'); await build(c); syncUI(); }
+  else pick(ents.find(e=>e.kind==='char')||null);
+})();
+
+</script>
+</body>
+</html>
