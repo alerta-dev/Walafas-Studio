@@ -7,3 +7,4 @@ Local: `python3 -m http.server`. Activa gzip/brotli (Netlify lo hace solo).
 
 Funciones: editor de personajes (DNA compatible 3.39), fondos, objetos, globos de texto, imágenes propias (botón o arrastrar a la escena),
 adjuntar objetos/imágenes/globos a un personaje, capas, PNG transparente.
+   
