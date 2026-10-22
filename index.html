@@ -200,7 +200,7 @@ const CATS=[['Hats','Sombrero'],['Eyes','Ojos'],['Mouth','Boca'],['Hair','Pelo']
 const KEY={Hats:'hat',Hair:'head',Body:'body',Arms:'arm',Shoes:'shoe',Eyes:'eye',Mouth:'mouth',Items:'item',Acc:'acc',Back:'wing'};
 const DNAORDER=['Hats','Hair','Body','Arms','Shoes','Eyes','Mouth','Items','Acc','Back'];
 const KIND={char:'🧍',obj:'📦',img:'🖼',bubble:'💬'};
-const DISCORD_URL=''; // ← opcional: pon aquí la URL de tu servidor (ej. 'https://discord.gg/xxxx') para que todos los visitantes la vean
+const DISCORD_URL='https://discord.com/invite/Y2VUgTE'; // ← opcional: pon aquí la URL de tu servidor (ej. 'https://discord.gg/xxxx') para que todos los visitantes la vean
 const SPK_ON='<svg viewBox="0 0 28 24" width="26" height="22" aria-hidden="true"><path d="M3 8.5h4.5L14 3.5v17l-6.5-5H3z" fill="currentColor" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path d="M18 8.2c1.9 2.2 1.9 5.4 0 7.6M21.4 5.2c3.4 3.8 3.4 9.8 0 13.6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>', SPK_OFF='<svg viewBox="0 0 28 24" width="26" height="22" aria-hidden="true"><path d="M3 8.5h4.5L14 3.5v17l-6.5-5H3z" fill="currentColor" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path d="M18.5 9l6.5 6.5M25 9l-6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/></svg>';
 function discordUrl(){ try{ return localStorage.getItem('walfas-discord')||DISCORD_URL; }catch(e){ return DISCORD_URL; } }
 function askDiscord(cur){
